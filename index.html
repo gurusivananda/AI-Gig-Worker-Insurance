@@ -1,0 +1,770 @@
+
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--font-sans); }
+  .phone-wrap {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 1.5rem 0;
+    gap: 2rem;
+    flex-wrap: wrap;
+  }
+  .phone {
+    width: 340px;
+    min-height: 680px;
+    background: var(--color-background-primary);
+    border: 0.5px solid var(--color-border-secondary);
+    border-radius: 32px;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+  .status-bar {
+    background: #0F172A;
+    color: #fff;
+    font-size: 11px;
+    padding: 8px 20px;
+    display: flex;
+    justify-content: space-between;
+  }
+  .screen { display: none; flex-direction: column; flex: 1; }
+  .screen.active { display: flex; }
+
+  .nav-bar {
+    background: #0F172A;
+    padding: 14px 20px 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .nav-bar .back-btn {
+    color: #F97316;
+    font-size: 13px;
+    cursor: pointer;
+    border: none;
+    background: none;
+    padding: 0;
+  }
+  .nav-bar .title { color: #fff; font-size: 15px; font-weight: 500; }
+
+  .screen-body { padding: 16px; flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; }
+
+  .btn-primary {
+    background: #F97316;
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    padding: 13px;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    width: 100%;
+    text-align: center;
+  }
+  .btn-secondary {
+    background: transparent;
+    color: #F97316;
+    border: 1.5px solid #F97316;
+    border-radius: 12px;
+    padding: 12px;
+    font-size: 14px;
+    cursor: pointer;
+    width: 100%;
+    text-align: center;
+  }
+  .label { font-size: 12px; color: var(--color-text-secondary); margin-bottom: 4px; }
+  .field-input {
+    width: 100%;
+    background: var(--color-background-secondary);
+    border: 0.5px solid var(--color-border-tertiary);
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 14px;
+    color: var(--color-text-primary);
+  }
+  .card {
+    background: var(--color-background-primary);
+    border: 0.5px solid var(--color-border-tertiary);
+    border-radius: 14px;
+    padding: 14px;
+  }
+  .badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 500;
+  }
+  .badge-orange { background: #FFF7ED; color: #C2410C; }
+  .badge-green { background: #F0FDF4; color: #166534; }
+  .badge-red { background: #FEF2F2; color: #991B1B; }
+  .badge-blue { background: #EFF6FF; color: #1D4ED8; }
+
+  .bottom-nav {
+    background: var(--color-background-primary);
+    border-top: 0.5px solid var(--color-border-tertiary);
+    display: flex;
+    padding: 10px 0 6px;
+  }
+  .nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    cursor: pointer;
+    font-size: 10px;
+    color: var(--color-text-secondary);
+  }
+  .nav-item.active { color: #F97316; }
+  .nav-icon { font-size: 16px; }
+
+  .progress-bar { height: 4px; background: var(--color-background-secondary); border-radius: 4px; overflow: hidden; }
+  .progress-fill { height: 100%; background: #F97316; border-radius: 4px; transition: width 0.5s; }
+
+  .step-dots { display: flex; gap: 6px; justify-content: center; }
+  .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--color-border-tertiary); }
+  .dot.active { background: #F97316; width: 18px; border-radius: 4px; }
+
+  .plan-card {
+    border: 1.5px solid var(--color-border-tertiary);
+    border-radius: 14px;
+    padding: 14px;
+    cursor: pointer;
+    transition: border-color 0.2s;
+    position: relative;
+  }
+  .plan-card.selected { border-color: #F97316; background: #FFF7ED; }
+  .plan-card .price { font-size: 22px; font-weight: 500; color: #F97316; }
+  .plan-card .plan-name { font-size: 13px; font-weight: 500; color: var(--color-text-primary); }
+  .plan-card .triggers { font-size: 11px; color: var(--color-text-secondary); margin-top: 6px; }
+
+  .trigger-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 0;
+    border-bottom: 0.5px solid var(--color-border-tertiary);
+  }
+  .trigger-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+  .trigger-icon.rain { background: #EFF6FF; }
+  .trigger-icon.heat { background: #FFF7ED; }
+  .trigger-icon.aqi  { background: #F0FDF4; }
+  .trigger-icon.civic{ background: #FEF2F2; }
+
+  .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .stat-card { background: var(--color-background-secondary); border-radius: 10px; padding: 12px; }
+  .stat-val { font-size: 20px; font-weight: 500; color: var(--color-text-primary); }
+  .stat-lbl { font-size: 11px; color: var(--color-text-secondary); margin-top: 2px; }
+
+  .alert-banner {
+    background: #FFF7ED;
+    border: 1px solid #FED7AA;
+    border-radius: 12px;
+    padding: 12px;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+  .alert-icon { font-size: 18px; flex-shrink: 0; }
+  .alert-title { font-size: 13px; font-weight: 500; color: #C2410C; }
+  .alert-sub { font-size: 11px; color: #9A3412; margin-top: 2px; }
+
+  .payout-animate { text-align: center; padding: 20px 0; }
+  .payout-circle {
+    width: 90px; height: 90px; border-radius: 50%;
+    background: #F0FDF4;
+    border: 3px solid #22C55E;
+    margin: 0 auto 16px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 36px;
+  }
+  .payout-amount { font-size: 36px; font-weight: 500; color: #166534; }
+
+  .fraud-row { display: flex; align-items: center; gap: 8px; padding: 8px 0; font-size: 13px; }
+  .fraud-check { width: 18px; height: 18px; border-radius: 50%; background: #22C55E; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 10px; flex-shrink: 0; }
+  .fraud-x { width: 18px; height: 18px; border-radius: 50%; background: #EF4444; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 10px; flex-shrink: 0; }
+
+  .side-panel {
+    width: 200px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding-top: 1.5rem;
+  }
+  .side-panel .step-btn {
+    background: var(--color-background-secondary);
+    border: 0.5px solid var(--color-border-tertiary);
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 13px;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    text-align: left;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .side-panel .step-btn.current {
+    border-color: #F97316;
+    color: #C2410C;
+    background: #FFF7ED;
+    font-weight: 500;
+  }
+  .side-panel .step-btn.done { color: #166534; border-color: #86EFAC; background: #F0FDF4; }
+  .side-num { width: 20px; height: 20px; border-radius: 50%; background: var(--color-background-tertiary); font-size: 11px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .side-panel h4 { font-size: 12px; color: var(--color-text-secondary); font-weight: 400; padding: 0 4px; }
+
+  .shimmer {
+    animation: shimmer 1.5s infinite;
+    background: linear-gradient(90deg, #FFF7ED 25%, #FDBA74 50%, #FFF7ED 75%);
+    background-size: 200% 100%;
+    border-radius: 8px; height: 8px; margin: 4px 0;
+  }
+  @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+
+  .pulse { animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
+
+  .weather-live {
+    background: #0F172A;
+    border-radius: 12px;
+    padding: 14px;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .weather-live .temp { font-size: 28px; font-weight: 500; }
+  .weather-live .city { font-size: 12px; color: #94A3B8; }
+  .weather-live .condition { font-size: 13px; color: #FB923C; }
+
+  .history-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 0.5px solid var(--color-border-tertiary); font-size: 13px; }
+  .history-amt { font-weight: 500; color: #166534; }
+</style>
+
+<div class="phone-wrap">
+
+  <div class="side-panel" id="sidePanel">
+    <h4>App screens</h4>
+    <button class="step-btn current" onclick="goTo(0)" id="s0">
+      <span class="side-num">1</span> Splash
+    </button>
+    <button class="step-btn" onclick="goTo(1)" id="s1">
+      <span class="side-num">2</span> Register
+    </button>
+    <button class="step-btn" onclick="goTo(2)" id="s2">
+      <span class="side-num">3</span> Risk Profile
+    </button>
+    <button class="step-btn" onclick="goTo(3)" id="s3">
+      <span class="side-num">4</span> Pick Plan
+    </button>
+    <button class="step-btn" onclick="goTo(4)" id="s4">
+      <span class="side-num">5</span> Dashboard
+    </button>
+    <button class="step-btn" onclick="goTo(5)" id="s5">
+      <span class="side-num">6</span> Disruption Alert
+    </button>
+    <button class="step-btn" onclick="goTo(6)" id="s6">
+      <span class="side-num">7</span> Claim Triggered
+    </button>
+    <button class="step-btn" onclick="goTo(7)" id="s7">
+      <span class="side-num">8</span> Payout Success
+    </button>
+  </div>
+
+  <div class="phone">
+    <div class="status-bar">
+      <span>9:41 AM</span>
+      <span>GigShield</span>
+      <span>4G 100%</span>
+    </div>
+
+    <!-- SCREEN 0: SPLASH -->
+    <div class="screen active" id="sc0">
+      <div style="background:#0F172A; flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:32px 24px; gap:20px;">
+        <div style="width:72px;height:72px;border-radius:18px;background:#F97316;display:flex;align-items:center;justify-content:center;font-size:32px;">🛡️</div>
+        <div style="text-align:center;">
+          <div style="font-size:26px;font-weight:500;color:#fff;">GigShield</div>
+          <div style="font-size:13px;color:#94A3B8;margin-top:6px;line-height:1.5;">India's first income shield<br>for delivery partners</div>
+        </div>
+        <div style="background:#1E293B;border-radius:12px;padding:14px;width:100%;margin-top:10px;">
+          <div style="font-size:12px;color:#94A3B8;margin-bottom:8px;">Trusted by delivery partners on</div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <span style="background:#E8403A;color:#fff;font-size:11px;padding:4px 10px;border-radius:6px;">Zomato</span>
+            <span style="background:#FC8019;color:#fff;font-size:11px;padding:4px 10px;border-radius:6px;">Swiggy</span>
+            <span style="background:#0F9D58;color:#fff;font-size:11px;padding:4px 10px;border-radius:6px;">Blinkit</span>
+            <span style="background:#146EB4;color:#fff;font-size:11px;padding:4px 10px;border-radius:6px;">Amazon</span>
+          </div>
+        </div>
+        <div style="width:100%;display:flex;flex-direction:column;gap:10px;margin-top:auto;">
+          <button class="btn-primary" onclick="goTo(1)">Register Now →</button>
+          <button style="background:transparent;border:1px solid #475569;color:#94A3B8;border-radius:12px;padding:12px;font-size:14px;cursor:pointer;">Login</button>
+        </div>
+        <div style="font-size:11px;color:#475569;text-align:center;">IRDAI sandbox compliant · ₹49/week</div>
+      </div>
+    </div>
+
+    <!-- SCREEN 1: REGISTER -->
+    <div class="screen" id="sc1">
+      <div class="nav-bar">
+        <button class="back-btn" onclick="goTo(0)">← Back</button>
+        <span class="title">Create Account</span>
+      </div>
+      <div style="padding:12px 16px 4px;">
+        <div class="step-dots">
+          <div class="dot active"></div><div class="dot active"></div><div class="dot"></div><div class="dot"></div>
+        </div>
+        <div style="font-size:11px;color:var(--color-text-secondary);text-align:center;margin-top:6px;">Step 1 of 4 — Basic Details</div>
+      </div>
+      <div class="screen-body">
+        <div>
+          <div class="label">Full Name</div>
+          <input class="field-input" type="text" value="Ravi Kumar" />
+        </div>
+        <div>
+          <div class="label">Mobile Number</div>
+          <input class="field-input" type="text" value="+91 98765 43210" />
+        </div>
+        <div>
+          <div class="label">City</div>
+          <select class="field-input">
+            <option selected>Hyderabad</option>
+            <option>Bengaluru</option>
+            <option>Delhi NCR</option>
+            <option>Mumbai</option>
+          </select>
+        </div>
+        <div>
+          <div class="label">Delivery Platform</div>
+          <select class="field-input">
+            <option selected>Swiggy</option>
+            <option>Zomato</option>
+            <option>Blinkit</option>
+            <option>Amazon</option>
+          </select>
+        </div>
+        <div>
+          <div class="label">Avg. Daily Earnings (₹)</div>
+          <input class="field-input" type="number" value="700" />
+        </div>
+        <div>
+          <div class="label">Aadhaar / DL (mock upload)</div>
+          <div style="border:1.5px dashed var(--color-border-secondary);border-radius:10px;padding:16px;text-align:center;color:var(--color-text-secondary);font-size:13px;">
+            📎 Tap to upload ID proof<br><span style="font-size:11px;color:var(--color-text-secondary);">Aadhaar / Driving Licence</span>
+          </div>
+        </div>
+        <button class="btn-primary" onclick="goTo(2)">Analyse My Risk →</button>
+      </div>
+    </div>
+
+    <!-- SCREEN 2: RISK PROFILE -->
+    <div class="screen" id="sc2">
+      <div class="nav-bar">
+        <button class="back-btn" onclick="goTo(1)">← Back</button>
+        <span class="title">Your Risk Profile</span>
+      </div>
+      <div class="screen-body">
+        <div style="text-align:center;padding:10px 0 4px;">
+          <div style="width:56px;height:56px;border-radius:50%;background:#FFF7ED;border:2px solid #F97316;margin:0 auto 10px;display:flex;align-items:center;justify-content:center;font-size:24px;">👤</div>
+          <div style="font-size:17px;font-weight:500;">Hi Ravi! 👋</div>
+          <div style="font-size:12px;color:var(--color-text-secondary);margin-top:3px;">Swiggy Partner · Hyderabad South</div>
+        </div>
+        <div class="card" style="border-color:#FED7AA;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+            <span style="font-size:13px;font-weight:500;">Zone Risk Level</span>
+            <span class="badge badge-orange">🟡 Medium Risk</span>
+          </div>
+          <div class="progress-bar"><div class="progress-fill" style="width:58%;background:#F97316;"></div></div>
+          <div style="font-size:11px;color:var(--color-text-secondary);margin-top:6px;">Risk Score: 58 / 100 · Hyderabad flood-prone zones</div>
+        </div>
+        <div class="stat-grid">
+          <div class="stat-card">
+            <div style="font-size:16px;">🌧️</div>
+            <div class="stat-val">14</div>
+            <div class="stat-lbl">Rain disruption days/yr</div>
+          </div>
+          <div class="stat-card">
+            <div style="font-size:16px;">🌡️</div>
+            <div class="stat-val">8</div>
+            <div class="stat-lbl">Heat alert days/yr</div>
+          </div>
+          <div class="stat-card">
+            <div style="font-size:16px;">💨</div>
+            <div class="stat-val">5</div>
+            <div class="stat-lbl">AQI alert days/yr</div>
+          </div>
+          <div class="stat-card">
+            <div style="font-size:16px;">🚫</div>
+            <div class="stat-val">3</div>
+            <div class="stat-lbl">Civic disruptions/yr</div>
+          </div>
+        </div>
+        <div class="card">
+          <div style="font-size:12px;color:var(--color-text-secondary);margin-bottom:6px;">AI Recommendation</div>
+          <div style="font-size:13px;color:var(--color-text-primary);line-height:1.5;">Based on your zone and earnings of <strong>₹700/day</strong>, you could lose up to <strong style="color:#C2410C;">₹4,200/month</strong> during disruptions. We recommend the Standard plan.</div>
+        </div>
+        <button class="btn-primary" onclick="goTo(3)">View My Plans →</button>
+      </div>
+    </div>
+
+    <!-- SCREEN 3: PLAN SELECTION -->
+    <div class="screen" id="sc3">
+      <div class="nav-bar">
+        <button class="back-btn" onclick="goTo(2)">← Back</button>
+        <span class="title">Choose Your Plan</span>
+      </div>
+      <div class="screen-body">
+        <div style="font-size:13px;color:var(--color-text-secondary);">Weekly premium · Auto-renews every Monday</div>
+
+        <div class="plan-card" id="plan0" onclick="selectPlan(0)">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+            <div>
+              <div class="plan-name">Basic</div>
+              <div class="price">₹29<span style="font-size:13px;color:var(--color-text-secondary);font-weight:400;">/week</span></div>
+            </div>
+            <span class="badge badge-blue">Max ₹600</span>
+          </div>
+          <div class="triggers">Covers: Heavy Rain · Floods</div>
+        </div>
+
+        <div class="plan-card selected" id="plan1" onclick="selectPlan(1)" style="position:relative;">
+          <div style="position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:#F97316;color:#fff;font-size:10px;padding:2px 12px;border-radius:10px;">★ Recommended</div>
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+            <div>
+              <div class="plan-name">Standard</div>
+              <div class="price">₹49<span style="font-size:13px;color:var(--color-text-secondary);font-weight:400;">/week</span></div>
+            </div>
+            <span class="badge badge-orange">Max ₹1,050</span>
+          </div>
+          <div class="triggers">Covers: Rain · Floods · Extreme Heat · AQI</div>
+        </div>
+
+        <div class="plan-card" id="plan2" onclick="selectPlan(2)">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+            <div>
+              <div class="plan-name">Premium</div>
+              <div class="price">₹79<span style="font-size:13px;color:var(--color-text-secondary);font-weight:400;">/week</span></div>
+            </div>
+            <span class="badge badge-green">Max ₹2,000</span>
+          </div>
+          <div class="triggers">Covers: All triggers + Curfew · Civic strikes</div>
+        </div>
+
+        <div class="card" style="background:var(--color-background-secondary);">
+          <div style="font-size:12px;color:var(--color-text-secondary);">Your dynamic premium this week</div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px;">
+            <span style="font-size:13px;">Base ₹49 × Zone 1.3 × Monsoon 1.1</span>
+            <span style="font-size:15px;font-weight:500;color:#F97316;">₹69.97</span>
+          </div>
+          <div style="font-size:11px;color:var(--color-text-secondary);margin-top:4px;">Monsoon season surcharge applied</div>
+        </div>
+
+        <button class="btn-primary" onclick="goTo(4)">Activate Coverage · Pay ₹70 →</button>
+        <div style="font-size:11px;color:var(--color-text-secondary);text-align:center;">Paid via UPI · Auto-renews weekly</div>
+      </div>
+    </div>
+
+    <!-- SCREEN 4: DASHBOARD -->
+    <div class="screen" id="sc4">
+      <div style="background:#0F172A;padding:14px 16px 16px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div>
+            <div style="color:#94A3B8;font-size:12px;">Good morning,</div>
+            <div style="color:#fff;font-size:16px;font-weight:500;">Ravi Kumar 👋</div>
+          </div>
+          <div style="width:36px;height:36px;border-radius:50%;background:#F97316;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:500;">R</div>
+        </div>
+        <div style="background:#1E293B;border-radius:12px;padding:12px;margin-top:12px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <div>
+              <div style="color:#94A3B8;font-size:11px;">Coverage Active</div>
+              <div style="color:#4ADE80;font-size:14px;font-weight:500;">✓ Mar 20 – Mar 26</div>
+            </div>
+            <span style="background:#166534;color:#4ADE80;font-size:11px;padding:4px 10px;border-radius:8px;">Standard Plan</span>
+          </div>
+          <div style="margin-top:10px;display:flex;justify-content:space-between;">
+            <div style="text-align:center;">
+              <div style="color:#fff;font-size:17px;font-weight:500;">₹1,050</div>
+              <div style="color:#94A3B8;font-size:10px;">Max payout</div>
+            </div>
+            <div style="text-align:center;">
+              <div style="color:#fff;font-size:17px;font-weight:500;">₹70</div>
+              <div style="color:#94A3B8;font-size:10px;">Paid this week</div>
+            </div>
+            <div style="text-align:center;">
+              <div style="color:#4ADE80;font-size:17px;font-weight:500;">₹420</div>
+              <div style="color:#94A3B8;font-size:10px;">Claimed total</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="screen-body">
+        <div class="weather-live">
+          <div>
+            <div class="city">Hyderabad · Live</div>
+            <div class="condition">🌧️ Heavy Rain</div>
+            <div style="font-size:11px;color:#64748B;margin-top:3px;">28mm/hr · IMD Red Alert</div>
+          </div>
+          <div class="temp">24°C</div>
+        </div>
+
+        <div class="alert-banner" style="cursor:pointer;" onclick="goTo(5)">
+          <div class="alert-icon pulse">⚡</div>
+          <div>
+            <div class="alert-title">Disruption Detected!</div>
+            <div class="alert-sub">Heavy rain threshold breached · Tap to view claim</div>
+          </div>
+        </div>
+
+        <div style="font-size:13px;font-weight:500;color:var(--color-text-primary);">Active Triggers</div>
+        <div>
+          <div class="trigger-row">
+            <div class="trigger-icon rain">🌧️</div>
+            <div style="flex:1;">
+              <div style="font-size:13px;font-weight:500;">Heavy Rain</div>
+              <div style="font-size:11px;color:var(--color-text-secondary);">28mm/hr · Triggered</div>
+            </div>
+            <span class="badge badge-red pulse">LIVE</span>
+          </div>
+          <div class="trigger-row">
+            <div class="trigger-icon heat">🌡️</div>
+            <div style="flex:1;">
+              <div style="font-size:13px;font-weight:500;">Extreme Heat</div>
+              <div style="font-size:11px;color:var(--color-text-secondary);">36°C · Below threshold</div>
+            </div>
+            <span class="badge badge-green">OK</span>
+          </div>
+          <div class="trigger-row" style="border:none;">
+            <div class="trigger-icon aqi">💨</div>
+            <div style="flex:1;">
+              <div style="font-size:13px;font-weight:500;">Air Quality</div>
+              <div style="font-size:11px;color:var(--color-text-secondary);">AQI 89 · Moderate</div>
+            </div>
+            <span class="badge badge-green">OK</span>
+          </div>
+        </div>
+      </div>
+      <div class="bottom-nav">
+        <div class="nav-item active"><span class="nav-icon">🏠</span>Home</div>
+        <div class="nav-item" onclick="goTo(6)"><span class="nav-icon">📋</span>Claims</div>
+        <div class="nav-item" onclick="goTo(7)"><span class="nav-icon">💸</span>Payouts</div>
+        <div class="nav-item"><span class="nav-icon">👤</span>Profile</div>
+      </div>
+    </div>
+
+    <!-- SCREEN 5: DISRUPTION ALERT -->
+    <div class="screen" id="sc5">
+      <div class="nav-bar">
+        <button class="back-btn" onclick="goTo(4)">← Back</button>
+        <span class="title">Disruption Alert</span>
+      </div>
+      <div class="screen-body">
+        <div style="background:#0F172A;border-radius:14px;padding:16px;color:#fff;text-align:center;">
+          <div style="font-size:36px;margin-bottom:8px;">🌧️</div>
+          <div style="font-size:16px;font-weight:500;">IMD Red Alert Active</div>
+          <div style="font-size:12px;color:#94A3B8;margin-top:4px;">Hyderabad South · Since 2:15 PM</div>
+          <div style="margin-top:14px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">
+            <div><div style="font-size:18px;font-weight:500;color:#FB923C;">28mm</div><div style="font-size:10px;color:#64748B;">Rainfall/hr</div></div>
+            <div><div style="font-size:18px;font-weight:500;color:#FB923C;">3.5 hrs</div><div style="font-size:10px;color:#64748B;">Duration</div></div>
+            <div><div style="font-size:18px;font-weight:500;color:#4ADE80;">TRIG.</div><div style="font-size:10px;color:#64748B;">Status</div></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div style="font-size:13px;font-weight:500;margin-bottom:10px;">Payout Calculation</div>
+          <div style="display:flex;justify-content:space-between;font-size:13px;padding:6px 0;border-bottom:0.5px solid var(--color-border-tertiary);">
+            <span style="color:var(--color-text-secondary);">Avg hourly earnings</span>
+            <span>₹87.50</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:13px;padding:6px 0;border-bottom:0.5px solid var(--color-border-tertiary);">
+            <span style="color:var(--color-text-secondary);">Disruption hours</span>
+            <span>3.5 hrs</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:13px;padding:6px 0;border-bottom:0.5px solid var(--color-border-tertiary);">
+            <span style="color:var(--color-text-secondary);">Coverage ratio (Standard)</span>
+            <span>80%</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:15px;font-weight:500;padding:8px 0;color:#166534;">
+            <span>Payout Amount</span>
+            <span>₹245</span>
+          </div>
+        </div>
+
+        <div class="card">
+          <div style="font-size:13px;font-weight:500;margin-bottom:8px;">Fraud Validation</div>
+          <div class="fraud-row">
+            <div class="fraud-check">✓</div>
+            <span>Policy active during event</span>
+          </div>
+          <div class="fraud-row">
+            <div class="fraud-check">✓</div>
+            <span>Location verified in alert zone</span>
+          </div>
+          <div class="fraud-row">
+            <div class="fraud-check">✓</div>
+            <span>No duplicate claim found</span>
+          </div>
+          <div class="fraud-row">
+            <div class="fraud-check">✓</div>
+            <span>Fraud score: 0.08 (safe)</span>
+          </div>
+        </div>
+
+        <button class="btn-primary" onclick="goTo(6)">Process Claim · ₹245 →</button>
+      </div>
+    </div>
+
+    <!-- SCREEN 6: CLAIM PROCESSING -->
+    <div class="screen" id="sc6">
+      <div class="nav-bar">
+        <span class="title" style="margin:0 auto;">Processing Claim</span>
+      </div>
+      <div class="screen-body" style="justify-content:center;align-items:center;text-align:center;gap:20px;">
+        <div style="font-size:48px;">⚡</div>
+        <div>
+          <div style="font-size:18px;font-weight:500;">Auto-Claim Triggered!</div>
+          <div style="font-size:13px;color:var(--color-text-secondary);margin-top:4px;">Heavy Rain · 28mm/hr · 3.5 hours</div>
+        </div>
+
+        <div style="width:100%;">
+          <div id="step1row" class="fraud-row" style="justify-content:center;opacity:1;">
+            <div class="fraud-check">✓</div><span>Disruption verified</span>
+          </div>
+          <div id="step2row" class="fraud-row" style="justify-content:center;opacity:0.3;">
+            <div class="fraud-check" style="background:#94A3B8;">2</div><span>Fraud score computed</span>
+          </div>
+          <div id="step3row" class="fraud-row" style="justify-content:center;opacity:0.3;">
+            <div class="fraud-check" style="background:#94A3B8;">3</div><span>Payout amount calculated</span>
+          </div>
+          <div id="step4row" class="fraud-row" style="justify-content:center;opacity:0.3;">
+            <div class="fraud-check" style="background:#94A3B8;">4</div><span>Sending to UPI...</span>
+          </div>
+        </div>
+
+        <div style="width:100%;">
+          <div class="progress-bar" style="height:6px;">
+            <div class="progress-fill" id="claimProgress" style="width:25%;transition:width 0.8s;"></div>
+          </div>
+          <div style="font-size:12px;color:var(--color-text-secondary);margin-top:6px;" id="progressLabel">Step 1 of 4</div>
+        </div>
+
+        <div style="font-size:28px;font-weight:500;color:#F97316;" id="payoutDisplay">₹245</div>
+        <div style="font-size:12px;color:var(--color-text-secondary);">Being credited to ravi@upi</div>
+      </div>
+    </div>
+
+    <!-- SCREEN 7: PAYOUT SUCCESS -->
+    <div class="screen" id="sc7">
+      <div class="screen-body" style="justify-content:center;align-items:center;text-align:center;gap:18px;">
+        <div class="payout-circle">✓</div>
+        <div>
+          <div style="font-size:14px;color:var(--color-text-secondary);">Payout credited!</div>
+          <div class="payout-amount">₹245</div>
+          <div style="font-size:13px;color:var(--color-text-secondary);margin-top:4px;">to ravi@upi · Just now</div>
+        </div>
+
+        <div class="card" style="width:100%;text-align:left;">
+          <div style="font-size:12px;color:var(--color-text-secondary);margin-bottom:8px;">Claim Summary</div>
+          <div class="history-row" style="font-size:12px;">
+            <span style="color:var(--color-text-secondary);">Event</span>
+            <span>Heavy Rain · Hyderabad</span>
+          </div>
+          <div class="history-row" style="font-size:12px;">
+            <span style="color:var(--color-text-secondary);">Duration</span>
+            <span>3.5 hours</span>
+          </div>
+          <div class="history-row" style="font-size:12px;">
+            <span style="color:var(--color-text-secondary);">Time</span>
+            <span>Mar 21 · 3:47 PM</span>
+          </div>
+          <div class="history-row" style="font-size:12px;border:none;">
+            <span style="color:var(--color-text-secondary);">Claim ID</span>
+            <span style="color:var(--color-text-secondary);">#GS-2026-0312</span>
+          </div>
+        </div>
+
+        <div class="card" style="width:100%;text-align:left;">
+          <div style="font-size:12px;color:var(--color-text-secondary);margin-bottom:8px;">Payout History this week</div>
+          <div class="history-row" style="font-size:12px;">
+            <span>Mar 18 · Rain</span><span class="history-amt">+₹175</span>
+          </div>
+          <div class="history-row" style="font-size:12px;">
+            <span>Mar 21 · Rain</span><span class="history-amt">+₹245</span>
+          </div>
+          <div class="history-row" style="font-size:12px;border:none;font-weight:500;">
+            <span>Total protected</span><span class="history-amt">₹420</span>
+          </div>
+        </div>
+
+        <div style="font-size:12px;color:var(--color-text-secondary);background:var(--color-background-secondary);padding:10px;border-radius:10px;width:100%;">
+          Stay safe, Ravi! Your coverage renews Monday.<br>
+          <span style="color:#F97316;">Premium paid: ₹70 · Max remaining: ₹630</span>
+        </div>
+
+        <button class="btn-primary" onclick="goTo(4)">← Back to Dashboard</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  var current = 0;
+  var claimTimer = null;
+
+  function goTo(n) {
+    document.getElementById('sc' + current).classList.remove('active');
+    document.getElementById('sc' + n).classList.add('active');
+    for (var i = 0; i < 8; i++) {
+      var el = document.getElementById('s' + i);
+      el.classList.remove('current', 'done');
+      if (i < n) el.classList.add('done');
+      if (i === n) el.classList.add('current');
+    }
+    current = n;
+    if (n === 6) startClaimAnimation();
+  }
+
+  function selectPlan(idx) {
+    for (var i = 0; i < 3; i++) {
+      document.getElementById('plan' + i).classList.remove('selected');
+    }
+    document.getElementById('plan' + idx).classList.add('selected');
+  }
+
+  function startClaimAnimation() {
+    var steps = [
+      {pct: '25%', label: 'Step 1 of 4', rowId: 'step1row'},
+      {pct: '50%', label: 'Step 2 of 4', rowId: 'step2row'},
+      {pct: '75%', label: 'Step 3 of 4', rowId: 'step3row'},
+      {pct: '100%', label: 'Step 4 of 4', rowId: 'step4row'}
+    ];
+    var step = 0;
+
+    function next() {
+      if (step >= steps.length) {
+        setTimeout(function(){ goTo(7); }, 700);
+        return;
+      }
+      document.getElementById('claimProgress').style.width = steps[step].pct;
+      document.getElementById('progressLabel').textContent = steps[step].label;
+      var row = document.getElementById(steps[step].rowId);
+      row.style.opacity = '1';
+      var chk = row.querySelector('div');
+      if (chk) { chk.style.background = '#22C55E'; chk.textContent = '✓'; }
+      step++;
+      claimTimer = setTimeout(next, 900);
+    }
+
+    ['step1row','step2row','step3row','step4row'].forEach(function(id){
+      var r = document.getElementById(id);
+      r.style.opacity = id === 'step1row' ? '1' : '0.3';
+      var c = r.querySelector('div');
+      if (c && id !== 'step1row') { c.style.background = '#94A3B8'; }
+    });
+    document.getElementById('claimProgress').style.width = '0%';
+    document.getElementById('progressLabel').textContent = 'Initializing...';
+
+    claimTimer = setTimeout(next, 400);
+  }
+</script>
